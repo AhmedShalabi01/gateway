@@ -1,0 +1,67 @@
+server:
+    port: 8088
+    ssl:
+        key-alias: pacs
+        key-store: classpath:pacs.jks
+        key-store-password: pacsSystem
+        key-store-type: JKS
+spring:
+    application:
+        name: gateway
+    cloud:
+        gateway:
+            httpclient:
+                ssl:
+                    use-insecure-trust-manager: true
+            default-filters:
+                - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            globalcors:
+                cors-configurations:
+                    '[/**]':
+                        allowedOrigins: "*"
+                        allowedMethods: "*"
+                        allowedHeaders: "*"
+            routes:
+            -   id: attributes_management
+                predicates:
+                - Path=/attributes-management/**
+                uri: lb://ATTRIBUTES-MANAGEMENT-API
+            -   id: access-policy
+                predicates:
+                - Path=/access-policies/**
+                uri: lb://ACCESS-POLICY-MANAGEMENT-API
+            -   id: user_login_registration
+                predicates:
+                - Path=/login-registration/**
+                uri: lb://USER-LOGIN-REGISTRATION-API
+            -   id: company-data-gateway
+                predicates:
+                - Path=/employee/**
+                uri: lb://COMPANY-DATA-GATEWAY-API
+            -   id: visitor_management
+                predicates:
+                - Path=/visitor-management/**
+                uri: lb://VISITOR-MANAGEMENT-API
+            -   id: user-credentials
+                predicates:
+                - Path=/user-credentials/**
+                uri: lb://USER-CREDENTIALS-API
+            -   id: access-control
+                predicates:
+                - Path=/access-control/**
+                uri: lb://ACCESS-CONTROL-API
+
+eureka:
+    client:
+        fetch-registry: true
+        register-with-eureka: true
+        serviceUrl:
+            defaultZone: http://servicereg:8761/eureka/
+logging:
+    level:
+        org:
+            springframework:
+                cloud:
+                    gateway: TRACE
+                    gateway.route.RouteDefinitionLocator: INFO
+        root: info
